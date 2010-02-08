@@ -1,0 +1,90 @@
+#!/usr/bin/env ruby
+
+require 'rubygems'
+require 'luck'
+
+require File.join(File.dirname(__FILE__), 'irc')
+
+class IRCConnection < IRC
+  on :message do |e|
+    return unless e.params.any?
+ 
+    puts "<-- MSG [#{e.origin[:nick]}/#{e.reply_to}] #{e.param}"
+ 
+    #~ if e.param.include?('schemey') && ["FBI::danopia::bot", "DBE189F8.7D706AED.7133B3C8.IP"].include?(e.origin[:host]) && e.origin[:nick].include?('FBI')
+      #~ `git pull`
+      #~ ret = parser_reload!
+      #~ @last_reload = Time.now
+    #~ end
+  end
+end
+
+#~ def self.connect server, port, *args
+#~ def initialize(nick, channels=nil, admins=[], ident=nil, realname=nil, password=nil)
+
+display = Luck::Display.new nil
+
+trap 'INT' do
+  display.undo_modes
+  exit
+end
+
+begin
+  display.pane :left, 1, 1, 20, -1, 'Channels' do
+    control :chans, Luck::ListBox, 1, 1, -1, -1 do
+      number!
+    end
+  end
+
+  display.pane :main, 20, 1, -20, -1, 'Topic goes here' do
+    control :history, Luck::ListBox, 1, 1, -1, -2 do
+      number!
+    end
+    display.active_control = control :input, Luck::TextBox, 2, -1, -2, -1 do
+      #self.label = 'danopia'
+      self.text = ''
+    end
+  end
+
+  display.pane :right, -20, 1, -1, -1, 'Nicks' do
+    control :nicks, Luck::ListBox, 1, 1, -1, -1
+  end
+
+  #~ display.panes[:main].controls[:search].on_submit do |query|
+    #~ next if query.empty?
+	#~ 
+    #~ if query.to_i.to_s == query && results
+      #~ index = query.to_i - 1
+      #~ next if index < 0 || index > results.size
+      #~ 
+      #~ song = results[index]
+      #~ client.queue << song
+      #~ 
+      #~ unless client.now_playing
+        #~ Thread.new do
+          #~ begin
+            #~ client.queue.play_radio
+          #~ rescue => ex
+            #~ display.undo_modes
+            #~ puts ex.class, ex.message, ex.backtrace
+            #~ exit
+          #~ end
+        #~ end
+      #~ end
+    #~ else
+      #~ results = client.search_songs(query)['Return']
+      #~ display.panes[:main].controls[:results].data = results.map do |result|
+        #~ "#{result['Name']} - #{result['ArtistName']} - #{result['AlbumName']}"
+      #~ end
+      #~ display.panes[:main].title = "Search Results for #{query}"
+      #~ display.dirty! :main
+    #~ end
+  #~ end
+
+  display.handle while sleep 0.01
+
+rescue => ex
+  display.undo_modes
+  puts ex.class, ex.message, ex.backtrace
+  exit
+end
