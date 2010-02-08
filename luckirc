@@ -24,6 +24,14 @@ end
 
 display = Luck::Display.new nil
 
+connection = nil
+Thread.new {
+  EM.run {
+    connection = IRC.connect 'irc.eighthbit.net', 6667, 'luckirc', '#programming'
+#~ def initialize(nick, channels=nil, admins=[], ident=nil, realname=nil, password=nil)
+  }
+}
+
 trap 'INT' do
   display.undo_modes
   exit
