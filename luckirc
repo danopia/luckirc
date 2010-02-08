@@ -28,9 +28,7 @@ begin
   end
 
   display.pane :main, 20, 1, -20, -1, 'Topic goes here' do
-    control :history, Luck::ListBox, 1, 1, -1, -2 do
-      number!
-    end
+    control :history, Luck::ListBox, 2, 1, -2, -2
     display.active_control = control :input, Luck::TextBox, 2, -1, -2, -1 do
       #self.label = 'danopia'
       self.text = ''
@@ -48,37 +46,6 @@ begin
     display.panes[:main].controls[:history].data << "<#{e.origin[:nick]}> #{e.param}"
     display.dirty! :main
   end
-
-  #~ display.panes[:main].controls[:search].on_submit do |query|
-    #~ next if query.empty?
-	#~ 
-    #~ if query.to_i.to_s == query && results
-      #~ index = query.to_i - 1
-      #~ next if index < 0 || index > results.size
-      #~ 
-      #~ song = results[index]
-      #~ client.queue << song
-      #~ 
-      #~ unless client.now_playing
-        #~ Thread.new do
-          #~ begin
-            #~ client.queue.play_radio
-          #~ rescue => ex
-            #~ display.undo_modes
-            #~ puts ex.class, ex.message, ex.backtrace
-            #~ exit
-          #~ end
-        #~ end
-      #~ end
-    #~ else
-      #~ results = client.search_songs(query)['Return']
-      #~ display.panes[:main].controls[:results].data = results.map do |result|
-        #~ "#{result['Name']} - #{result['ArtistName']} - #{result['AlbumName']}"
-      #~ end
-      #~ display.panes[:main].title = "Search Results for #{query}"
-      #~ display.dirty! :main
-    #~ end
-  #~ end
 
   display.handle while sleep 0.01
 
