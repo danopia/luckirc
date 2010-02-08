@@ -190,9 +190,14 @@ class IRC < EventMachine::Connection
   end
   
   def receive_data packet
-    packet.strip!
-    
-    parts = packet.split ' :', 2
+    @buffer << packet
+    while @buffer.include? "\n"
+      receive_line @buffer.slice!(0, @buffer.index("\n")+1).chomp
+    end
+  end
+  
+  def receive_line data
+    parts = data.split ' :', 2
     args = parts[0].split ' '
     args << parts[1] if parts.size > 1
     
