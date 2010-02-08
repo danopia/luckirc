@@ -5,20 +5,6 @@ require 'luck'
 
 require File.join(File.dirname(__FILE__), 'irc')
 
-class IRCConnection < IRC
-  on :message do |e|
-    return unless e.params.any?
- 
-    puts "<-- MSG [#{e.origin[:nick]}/#{e.reply_to}] #{e.param}"
- 
-    #~ if e.param.include?('schemey') && ["FBI::danopia::bot", "DBE189F8.7D706AED.7133B3C8.IP"].include?(e.origin[:host]) && e.origin[:nick].include?('FBI')
-      #~ `git pull`
-      #~ ret = parser_reload!
-      #~ @last_reload = Time.now
-    #~ end
-  end
-end
-
 #~ def self.connect server, port, *args
 #~ def initialize(nick, channels=nil, admins=[], ident=nil, realname=nil, password=nil)
 
@@ -56,6 +42,14 @@ begin
 
   display.pane :right, -20, 1, -1, -1, 'Nicks' do
     control :nicks, Luck::ListBox, 1, 1, -1, -1
+  end
+  
+  IRC.on :message do |e|
+    return unless e.params.any?
+
+    #puts "<-- MSG [#{e.origin[:nick]}/#{e.reply_to}] #{e.param}"
+    display.panes[:main].controls[:history].data << "[#{e.origin[:nick]}/#{e.reply_to}] #{e.param}"
+    display.dirty! :main
   end
 
   #~ display.panes[:main].controls[:search].on_submit do |query|
