@@ -5,9 +5,6 @@ require 'luck'
 
 require File.join(File.dirname(__FILE__), 'irc')
 
-#~ def self.connect server, port, *args
-#~ def initialize(nick, channels=nil, admins=[], ident=nil, realname=nil, password=nil)
-
 display = Luck::Display.new nil
 
 connection = nil
@@ -48,7 +45,7 @@ begin
     return unless e.params.any?
 
     #puts "<-- MSG [#{e.origin[:nick]}/#{e.reply_to}] #{e.param}"
-    display.panes[:main].controls[:history].data << "[#{e.origin[:nick]}/#{e.reply_to}] #{e.param}"
+    display.panes[:main].controls[:history].data << "<#{e.origin[:nick]}> #{e.param}"
     display.dirty! :main
   end
 
