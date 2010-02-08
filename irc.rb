@@ -66,7 +66,7 @@ class IRC < EventMachine::Connection
     
     begin
       @port, @ip = Socket.unpack_sockaddr_in get_peername
-      puts "Connected to IRC at #{@ip}:#{@port}"
+      #puts "Connected to IRC at #{@ip}:#{@port}"
     rescue TypeError
       puts "Unable to determine endpoint (connection refused?)"
     end
@@ -85,7 +85,7 @@ class IRC < EventMachine::Connection
   
   def unbind
     puts "Disconnected from IRC"
-    EventMachine.stop_event_loop
+    #EventMachine.stop_event_loop
   end
   
   def send *params
@@ -125,11 +125,11 @@ class IRC < EventMachine::Connection
   end
   
   def message target, message
-    puts "--> [MSG/#{target}] #{message}"
+    #puts "--> [MSG/#{target}] #{message}"
     send 'PRIVMSG', target, message, true
   end
   def notice target, message
-    puts "--> [NOT/#{target}] #{message}"
+    #puts "--> [NOT/#{target}] #{message}"
     send 'NOTICE', target, message, true
   end
   
@@ -147,23 +147,23 @@ class IRC < EventMachine::Connection
   end
   
   def join channel
-    puts "--> Joining #{channel}"
+    #puts "--> Joining #{channel}"
     send 'JOIN', channel
   end
   def part channel, message='Leaving'
-    puts "--> Parting #{channel}"
+    #puts "--> Parting #{channel}"
     send 'PART', channel, message, true
   end
   
   def quit message='Leaving'
-    puts "--> Quiting: \"#{message}\""
+    #puts "--> Quiting: \"#{message}\""
     send 'QUIT', message, true
   end
   
   def handle event, origin=nil, target=nil, *params
     e = EventContext.new self, event, origin, target, params
 
-    puts "Handling #{event} from #{origin[:nick]} to #{target} with params #{params.join ' '}" if origin
+    #puts "Handling #{event} from #{origin[:nick]} to #{target} with params #{params.join ' '}" if origin
     
     return unless @@handlers[e.event]
     
