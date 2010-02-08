@@ -9,7 +9,7 @@ require File.join(File.dirname(__FILE__), 'event_context')
 #$SAFE=1
 
 class IRC < EventMachine::Connection
-  attr_accessor :ip, :port, :nick, :channels, :admins, :ident, :realname, :test
+  attr_accessor :ip, :port, :nick, :channels, :ident, :realname, :test
   
   def self.create_test_instance
     irc = allocate
@@ -20,7 +20,6 @@ class IRC < EventMachine::Connection
     
     irc.nick = 'test'
     irc.channels = '#test'
-    irc.admins = 'test::bot'
     irc.ident = 'test'
     irc.realname = 'A fake instance, ready for testing'
     
@@ -41,34 +40,7 @@ class IRC < EventMachine::Connection
     EventMachine::run { self.connect *args }
   end
 
-  @@commands = nil
   @@handlers = nil
-  def self.command name, help=nil, adminonly=false, &blck
-    reset_commands unless @@commands
-    @@commands[name.downcase] = {:name => name, :block => blck, :help => help, :adminonly => adminonly}
-  end
-  def self.reset_commands
-    @@commands = {}
-    
-    command 'help', 'Helps you out with the commands this bot has.' do |e|
-      cmd = @@commands[e.params.first]
-      
-      if e.params.none?
-        e.respond "My commands: #{@@commands.keys.join ', '}. Pass them to this help command for more information on an individual command."
-      elsif cmd
-        e.respond "#{cmd[:name]}: #{cmd[:help]}" + (cmd[:adminonly] ? '. Admin only.' : '')
-      else
-        e.respond "I can't find the #{e.params.first} command."
-      end
-    end
-    
-    command 'test', 'Tests the bot by providing a simple request.' do |e|
-      e.respond "It works!"
-    end
-  end
-  def self.commands
-    @@commands
-  end
   
   def self.on event, &blck
     reset_hooks unless @@handlers
@@ -79,49 +51,9 @@ class IRC < EventMachine::Connection
   def self.reset_hooks
     @@handlers = {}
     
-    # Only three come stock:
-    # :ping (to pong)
+    # Only one handler comes stock: :ping (to pong)
     on :ping do |e|
       e.conn.send 'pong', *e.params
-    end
-    
-    # :message (to emit :command),
-    on :message do |e|
-      
-      # Comchars
-      if e.param.index($config['cc']) == 0 && e.param.size > $config['cc'].size
-        params = e.param[$config['cc'].size..-1].split ' '
-
-        e.conn.handle :command, e.origin, e.target, *params
-        
-      else			
-        # Addressing
-        params = e.param.split ' '
-        params.unshift e.conn.nick if e.pm?
-        
-        next if params.size < 2 || params.first.index(e.conn.nick) != 0
-        next if params.first.size > e.conn.nick.size + 1
-        
-        params.shift
-        e.conn.handle :command, e.origin, e.target, *params
-      end
-    end
-    
-    # and :command to hook into the command system (this is separate to support
-    # third-party :command callers such as CTCP)
-    on :command do |e|
-      command = @@commands[e.params.first.downcase]
-      
-      if command.nil?
-        # Silenced to be nice with Slack's bot, Isabella
-        #e.respond "\003\003No such command: #{e.params.first}"
-      elsif command[:adminonly] && !e.conn.admin?
-        e.respond "You much be a bot administrator to run #{e.params.first}."
-      else
-        # don't like how I modify e. only matters for multiple hooks though.
-        e.event = e.params.shift.to_sym
-        command[:block].call e
-      end
     end
   end
   
@@ -129,7 +61,7 @@ class IRC < EventMachine::Connection
     @@handlers.delete event.to_sym
   end
   
-  def initialize(nick, channels=nil, admins=[], ident=nil, realname=nil, password=nil)
+  def initialize(nick, channels=nil, ident=nil, realname=nil, password=nil)
     super()
     
     begin
@@ -141,7 +73,6 @@ class IRC < EventMachine::Connection
     
     @nick = nick
     @channels = channels
-    @admins = admins
     @ident = ident || @nick
     @realname = realname || "#{@nick} - powered by danopia's IRC library"
     @password = password
@@ -155,10 +86,6 @@ class IRC < EventMachine::Connection
   def unbind
     puts "Disconnected from IRC"
     EventMachine.stop_event_loop
-  end
-  
-  def admin? who
-    @admins.include?(who.is_a?(Hash) ? who[:host] : who)
   end
   
   def send *params

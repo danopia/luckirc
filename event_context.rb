@@ -28,10 +28,6 @@ class EventContext
 		@event == :ctcp || @event == :ctcp_reply
 	end
 	
-	def admin?
-		@conn.admin? origin
-	end
-	
 	def message message
 		@conn.message @reply_to, message
 	end
