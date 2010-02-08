@@ -165,9 +165,9 @@ class IRC < EventMachine::Connection
 
     #puts "Handling #{event} from #{origin[:nick]} to #{target} with params #{params.join ' '}" if origin
     
-    return unless @@handlers[e.event]
+    return unless @@handlers && @@handlers[e.event]
     
-    @@handlers[event].each do |block|
+    @@handlers[e.event].each do |block|
       begin
         block.call e
       rescue => ex

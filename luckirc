@@ -7,13 +7,13 @@ require File.join(File.dirname(__FILE__), 'irc')
 
 display = Luck::Display.new nil
 
-connection = nil
-Thread.new {
+$connection = nil
+#Thread.new {
   EM.run {
-    connection = IRC.connect 'irc.eighthbit.net', 6667, 'luckirc', '#programming'
+    $connection = IRC.connect 'irc.eighthbit.net', 6667, 'luckirc', '#programming'
 #~ def initialize(nick, channels=nil, admins=[], ident=nil, realname=nil, password=nil)
   }
-}
+#}
 
 trap 'INT' do
   display.undo_modes
@@ -37,6 +37,12 @@ begin
 
   display.pane :right, -20, 1, -1, -1, 'Nicks' do
     control :nicks, Luck::ListBox, 1, 1, -1, -1
+  end
+  
+  display.panes[:main].controls[:input].on_submit do |message|
+    $connection.message '#programming', message
+    display.panes[:main].controls[:history].data << "<luckirc> #{message}"
+    display.dirty! :main
   end
   
   IRC.on :message do |e|
