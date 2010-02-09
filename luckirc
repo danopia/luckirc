@@ -40,9 +40,15 @@ begin
   end
   
   display.panes[:main].controls[:input].on_submit do |message|
-    connection.message '#programming', message
-    display.panes[:main].controls[:history].data << "<luckirc> #{message}"
-    display.dirty! :main
+    if !(message =~ /^\/([^ ]+) ?(.+)$/)
+      connection.message '#programming', message
+      display.panes[:main].controls[:history].data << "<luckirc> #{message}"
+      display.dirty! :main
+    elsif $1 == 'me'
+      connection.action '#programming', $2
+      display.panes[:main].controls[:history].data << "* luckirc #{$2}"
+      display.dirty! :main
+    end
   end
   
   IRC.on :message do |e|
@@ -51,6 +57,15 @@ begin
     #puts "<-- MSG [#{e.origin[:nick]}/#{e.reply_to}] #{e.param}"
     display.panes[:main].controls[:history].data << "<#{e.origin[:nick]}> #{e.param}"
     display.dirty! :main
+  end
+  
+  IRC.on :ctcp do |e|
+    return unless e.params.any?
+    
+    if e.params.first == 'ACTION'
+      display.panes[:main].controls[:history].data << "* #{e.origin[:nick]} #{e.params[1].join(' ')}"
+      display.dirty! :main
+    end
   end
 
   display.handle while sleep 0.01
