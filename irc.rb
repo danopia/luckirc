@@ -264,7 +264,7 @@ class IRC < EventMachine::Connection
   def build_ctcp command, args=''
     command.upcase!
     args = args.join ' ' if args.is_a? Array
-    command << " #{args}" if args.any?
+    command << " #{args}" if !args.empty?
     "\001#{command}\001"
   end
 end

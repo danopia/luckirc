@@ -60,7 +60,7 @@ begin
   end
   
   IRC.on :ctcp do |e|
-    return unless e.params.any?
+    return unless e.params.size > 0
     
     if e.params.first == 'ACTION'
       display.panes[:main].controls[:history].data << "* #{e.origin[:nick]} #{e.params[1].join(' ')}"
