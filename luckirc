@@ -10,7 +10,7 @@ display = Luck::Display.new nil
 connection = nil
 Thread.new {
   EM.run {
-    connection = IRC.connect 'irc.eighthbit.net', 6667, 'luckirc', '#programming'
+    connection = IRC.connect 'irc.eighthbit.net', 6667, "luckirc-#{`hostname`}", '#programming', 'luckirc'
     #connection.send 'names', '#programming'
 #~ def initialize(nick, channels=nil, admins=[], ident=nil, realname=nil, password=nil)
   }
