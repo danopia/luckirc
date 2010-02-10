@@ -11,6 +11,7 @@ connection = nil
 Thread.new {
   EM.run {
     connection = IRC.connect 'irc.eighthbit.net', 6667, 'luckirc', '#programming'
+    #connection.send 'names', '#programming'
 #~ def initialize(nick, channels=nil, admins=[], ident=nil, realname=nil, password=nil)
   }
 }
@@ -22,7 +23,7 @@ end
 
 begin
   display.pane :left, 1, 1, 20, -1, 'Channels' do
-    control :chans, Luck::ListBox, 1, 1, -1, -1 do
+    control :chans, Luck::ListBox, 2, 1, -2, -1 do
       number!
     end
   end
@@ -36,7 +37,7 @@ begin
   end
 
   display.pane :right, -20, 1, -1, -1, 'Nicks' do
-    control :nicks, Luck::ListBox, 1, 1, -1, -1
+    control :nicks, Luck::ListBox, 2, 1, -2, -1
   end
   
   display.panes[:main].controls[:input].on_submit do |message|
@@ -65,6 +66,13 @@ begin
     if e.params.first == 'ACTION'
       display.panes[:main].controls[:history].data << "* #{e.origin[:nick]} #{e.params[1].join(' ')}"
       display.dirty! :main
+    end
+  end
+  
+  IRC.on :unhandled do |e|
+    if e.target == '353'
+      display.panes[:right].controls[:nicks].data = e.params[4].split
+      display.dirty! :right
     end
   end
 
