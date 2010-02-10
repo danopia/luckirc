@@ -73,6 +73,13 @@ begin
     if e.target == '353'
       display.panes[:right].controls[:nicks].data = e.params[4].split
       display.dirty! :right
+    elsif e.target == '332'
+      display.panes[:main].title = "#{e.params[2]}: #{e.params[3]}"
+      display.panes[:main].controls[:history].data << "*** Topic for #{e.params[2]}: #{e.params[3]}"
+      display.dirty! :main
+    elsif e.target == '333'
+      display.panes[:main].controls[:history].data << "*** Topic set by #{e.params[3]} at #{Time.at(e.params[4].to_i)}"
+      display.dirty! :main
     end
   end
 
