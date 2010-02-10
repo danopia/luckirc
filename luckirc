@@ -10,7 +10,7 @@ display = Luck::Display.new nil
 connection = nil
 Thread.new {
   EM.run {
-    connection = IRC.connect 'irc.eighthbit.net', 6667, "luckirc-#{`hostname`}", '#programming', 'luckirc'
+    connection = IRC.connect 'irc.eighthbit.net', 6667, "luckirc-#{`hostname`.chomp}", '#programming', 'luckirc'
     #connection.send 'names', '#programming'
 #~ def initialize(nick, channels=nil, admins=[], ident=nil, realname=nil, password=nil)
   }
@@ -43,11 +43,11 @@ begin
   display.panes[:main].controls[:input].on_submit do |message|
     if !(message =~ /^\/([^ ]+) ?(.+)$/)
       connection.message '#programming', message
-      display.panes[:main].controls[:history].data << "<luckirc> #{message}"
+      display.panes[:main].controls[:history].data << "<#{connection.nick}> #{message}"
       display.dirty! :main
     elsif $1 == 'me'
       connection.action '#programming', $2
-      display.panes[:main].controls[:history].data << "* luckirc #{$2}"
+      display.panes[:main].controls[:history].data << "* #{connection.nick} #{$2}"
       display.dirty! :main
     end
   end
